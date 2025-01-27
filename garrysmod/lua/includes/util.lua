@@ -3,9 +3,11 @@
 -- Hack for debug.getregistry
 --
 local meta = {}
+
 function meta.__index( self, key )
 	return FindMetaTable( key )
 end
+
 function meta.__newindex( self, key, value )
 	rawset( self, key, value )
 
@@ -15,8 +17,12 @@ function meta.__newindex( self, key, value )
 end
 
 local tbl = {}
+
 setmetatable( tbl, meta )
-function debug.getregistry() return tbl end
+
+function debug.getregistry() 
+	return tbl 
+end
 
 --
 -- Seed the rand!
@@ -516,4 +522,37 @@ function GetConVarString( name )
 	if ( name == "maxplayers" ) then return tostring( game.MaxPlayers() ) end -- ew
 	local c = GetConVar( name )
 	return ( c and c:GetString() ) or ""
+end
+
+--[[---------------------------------------------------------
+	Player notifications
+-----------------------------------------------------------]]
+
+if ( SERVER ) then
+
+	-- Add the NOTIFY enums
+	NOTIFY_GENERIC	= 0
+	NOTIFY_ERROR	= 1
+	NOTIFY_UNDO		= 2
+	NOTIFY_HINT		= 3
+	NOTIFY_CLEANUP	= 4
+
+	util.AddNetworkString( "GModPlayerNotify" )
+
+	function BroadcastNotify( text, notifyType, duration )
+
+		if ( !isstring( text ) ) then error( "bad argument #1 to 'BroadcastNotify' (string expected, got " .. type ( text ) .. ")", 2 ) return end
+		if ( !isnumber( notifyType ) ) then error( "bad argument #2 to 'BroadcastNotify' (number expected, got " .. type ( notifyType ) .. ")", 2 ) return end
+		if ( !isnumber( duration ) ) then error( "bad argument #3 to 'BroadcastNotify' (number expected, got " .. type ( duration ) .. ")", 2 ) return end
+
+		text = string.sub( text, 1, 255 ) -- Notification may not exceed 255 characters
+
+		net.Start( "GModPlayerNotify" )
+		net.WriteString( text )
+		net.WriteUInt( notifyType, 3 )
+		net.WriteUInt( duration, 32 )
+		net.Broadcast()
+
+	end
+
 end

@@ -11,6 +11,16 @@ NOTIFY_UNDO		= 2
 NOTIFY_HINT		= 3
 NOTIFY_CLEANUP	= 4
 
+net.Receive( "GModPlayerNotify", function()
+
+	local text = net.ReadString()
+	local notifyType = net.ReadUInt( 3 )
+	local duration = net.ReadUInt( 32 )
+
+	notification.AddLegacy( text, notifyType, duration )
+
+end)
+
 module( "notification", package.seeall )
 
 local NoticeMaterial = {}

@@ -261,6 +261,28 @@ function meta:HasGodMode()
 
 end
 
+-- Player notifications
+
+if ( SERVER ) then 
+
+	function meta:SendNotification( text, notifyType, duration )
+
+		if ( !isstring( text ) ) then error( "bad argument #1 to 'SendNotification' (string expected, got " .. type ( text ) .. ")", 2 ) return end
+		if ( !isnumber( notifyType ) ) then error( "bad argument #2 to 'SendNotification' (number expected, got " .. type ( notifyType ) .. ")", 2 ) return end
+		if ( !isnumber( duration ) ) then error( "bad argument #3 to 'SendNotification' (number expected, got " .. type ( duration ) .. ")", 2 ) return end
+
+		text = string.sub( text, 1, 255 ) -- Notification may not exceed 255 characters
+
+		net.Start( "GModPlayerNotify" )
+		net.WriteString( text )
+		net.WriteUInt( notifyType, 3 )
+		net.WriteUInt( duration, 32 )
+		net.Send( self )
+
+	end
+
+end
+
 -- These are totally in the wrong place.
 function player.GetByAccountID( ID )
 	local players = player.GetAll()
