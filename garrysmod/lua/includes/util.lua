@@ -55,8 +55,6 @@ end
 
 local next = next
 local getmetatable = getmetatable
-local TypeID = TypeID
-local TYPE_FUNCTION = TYPE_FUNCTION
 
 function pairs( tbl )
 
@@ -66,9 +64,7 @@ function pairs( tbl )
 
         local customIterator = mt.__pairs
 
-        -- Check if it's actually a function
-        -- TypeID is faster than the type function
-        if ( customIterator and TypeID( customIterator ) == TYPE_FUNCTION ) then
+        if ( customIterator ) then
 
             return customIterator( tbl )
 
@@ -93,7 +89,7 @@ function ipairs( tbl )
 
         local customIterator = mt.__ipairs
 
-        if ( customIterator and TypeID( customIterator ) == TYPE_FUNCTION ) then
+        if ( customIterator ) then
 
             return customIterator( tbl )
 
