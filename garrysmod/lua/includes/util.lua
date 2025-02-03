@@ -50,6 +50,62 @@ function Material( name, words )
 end
 
 --[[---------------------------------------------------------
+	pairs and ipairs
+-----------------------------------------------------------]]
+
+local next = next
+local getmetatable = getmetatable
+local TypeID = TypeID
+local TYPE_FUNCTION = TYPE_FUNCTION
+
+function pairs( tbl )
+
+    local mt = getmetatable( tbl )
+
+    if ( mt ) then
+
+        local customIterator = mt.__pairs
+
+        -- Check if it's actually a function
+        -- TypeID is faster than the type function
+        if ( customIterator and TypeID( customIterator ) == TYPE_FUNCTION ) then
+
+            return customIterator( tbl )
+
+        end
+
+    end
+
+    return next, tbl
+
+end
+
+--
+-- Cache the iterator function ipairs uses
+--
+local inext = ipairs( {} )
+
+function ipairs( tbl )
+
+    local mt = getmetatable( tbl )
+
+    if ( mt ) then
+
+        local customIterator = mt.__ipairs
+
+        if ( customIterator and TypeID( customIterator ) == TYPE_FUNCTION ) then
+
+            return customIterator( tbl )
+
+        end
+
+    end
+
+    return inext, tbl, 0
+
+end
+
+--[[---------------------------------------------------------
 	IsTableOfEntitiesValid
 -----------------------------------------------------------]]
 function IsTableOfEntitiesValid( tab )
