@@ -333,6 +333,88 @@ function util.Stack()
 	return setmetatable( { [ 0 ] = 0 }, STACK )
 end
 
+local QUEUE =
+{
+    Enqueue = function( self, item )
+        local tail = self[ 0 ]
+
+        self[ tail ] = item
+        self[ 0 ] = tail + 1
+    end,
+
+    Dequeue = function( self )
+        local head = self[ -1 ]
+        local tail = self[ 0 ]
+
+        if head == tail then
+            return error( "attempt to dequeue from an empty queue" )
+        end
+
+        local item = self[ head ]
+        self[ head ] = nil
+
+        head = head + 1
+        self[ -1 ] = head
+
+        if tail == head then
+            self[ -1 ] = 1
+            self[ 0 ] = 1
+        end
+
+        return item
+    end,
+
+    Contains = function( self, item )
+        local head = self[ -1 ]
+        local tail = self[ 0 ]
+
+        if head == tail then
+            return false
+        end
+
+        for i = head, tail - 1 do
+            if self[ i ] == item then
+                return true
+            end
+        end
+
+        return false
+    end,
+
+    Clear = function( self )
+        local head = self[ -1 ]
+        local tail = self[ 0 ]
+
+        if head == tail then return end
+
+        for i = head, tail - 1 do
+            self[ i ] = nil
+        end
+
+        self[ -1 ] = 1
+        self[ 0 ] = 1
+    end,
+
+    Peek = function( self )
+        return self[ self[ -1 ] ]
+    end,
+
+    Size = function( self )
+        return self[ 0 ] - self[ -1 ]
+    end
+}
+
+QUEUE.__index = QUEUE
+
+function util.Queue()
+    local queue = {
+        [ -1 ] = 1, -- Queue head (first index)
+        [ 0 ] = 1 -- Queue tail (last index)
+    }
+
+    return setmetatable( queue, QUEUE )
+end
+
 -- Helper for the following functions. This is not ideal but we cannot change this because it will break existing addons.
 local function GetUniqueID( sid )
 	return util.CRC( "gm_" .. sid .. "_gm" )
